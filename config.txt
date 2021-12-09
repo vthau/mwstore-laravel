@@ -1,0 +1,9 @@
+
+/usr/local/bin/php /home/trunghau/public_html/artisan queue:work --tries=3 --timeout=120 --daemon >/dev/null 2>&1
+php -d register_argc_argv=On /home/trunghau/public_html/artisan queue:work --tries=3 --timeout=120 --daemon >/dev/null 2>&1
+php -d register_argc_argv=On /home/trunghau/public_html/artisan schedule:run > /dev/null 2>&1
+/usr/local/bin/php /home/trunghau/public_html/artisan queue:work > /dev/null 2>&1
+/usr/local/bin/php /home/trunghau/public_html/artisan schedule:run > /dev/null 2>&1
+/usr/local/bin/php /home/trunghau/public_html/path/to/cron/script/artisan queue:work >/dev/null 2>&1
+php -d register_argc_argv=On /home/trunghau/public_html/path/to/cron/script/artisan queue:work >/dev/null 2>&1
+php -d register_argc_argv=On /home/trunghau/public_html/path/to/cron/artisan queue:work >/dev/null 2>&1

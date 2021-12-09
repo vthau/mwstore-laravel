@@ -1,0 +1,60 @@
+.row > h2 {
+    text-align: center !important;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 40px;
+}
+
+.covid-box {
+    background: #f5f5f5;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 0 auto;
+}
+
+.covid-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.covid-header > p {
+    padding: 0 10px 10px 0;
+    text-transform: uppercase;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.covid-header > select {
+    background: #f5f5f5;
+    max-width: 40%;
+}
+
+.covid-body {
+    margin-top: 4px;
+    border-top: 0.8px solid #e3e8f0;
+}
+
+.covid-body > img {
+    display: block;
+    margin: 50px auto 20px auto;
+    width: 235px;
+    height: 127px;
+    object-fit: cover;
+    background-position: center;
+    background-size: cover;
+    border-radius: 6px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+}
+
+.covid-body > h4 {
+    text-transform: uppercase;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.covid-body > table {
+    border-top: 1.2px solid #e3e8f0 !important;
+}
