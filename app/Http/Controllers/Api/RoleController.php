@@ -4,48 +4,57 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Role;
+use App\Services\RoleService;
+use Exception;
 
 class RoleController extends Controller
 {
+    protected $roleService;
+
+    public function __construct(RoleService $roleService)
+    {
+        $this->roleService = $roleService;
+    }
+
     public function all_role()
     {
-        $roles = Role::all();
-        return response()->json(["status" => "SUCCESS", "data" => $roles]);
+        $roles = $this->roleService->getAll();
+        return $this->successResponse($roles);
     }
 
     public function get_role(Request $req)
     {
-        $role = Role::with("permissions")->where("id", $req->id)->first();
-        if (!$role) return $role;
-        return response()->json(["status" => "SUCCESS", "data" => $role]);
+        $role = $this->roleService->getById($req);
+        return $this->successResponse($role);
     }
 
     public function new_role(Request $req)
     {
-        $role = new Role;
-        $role->fill($req->except(["permissions"]));
-        $role->save();
-
-        $permissionIds = $req->permissions;
-        $role->permissions()->attach($permissionIds);
-        return response()->json(["status" => "SUCCESS"]);
+        try {
+            $this->roleService->save($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     public function update_role(Request $req)
     {
-        $role = Role::find($req->id);
-        $role->fill($req->except(["permissions"]));
-        $role->save();
-
-        $permissionIds = $req->permissions;
-        $role->permissions()->sync($permissionIds);
-        return response()->json(["status" => "SUCCESS"]);
+        try {
+            $this->roleService->update($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     public function delete_role(Request $req)
     {
-        Role::find($req->id)->delete();
-        return response()->json(["status" => "SUCCESS"]);
+        try {
+            $this->roleService->delete($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 }

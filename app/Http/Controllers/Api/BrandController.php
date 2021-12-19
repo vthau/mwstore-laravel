@@ -3,55 +3,57 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Brand;
 use Illuminate\Http\Request;
-use App\Exports\ExportExcelBrand;
-use App\Imports\ImportExcelBrand;
-use Excel;
-use Carbon\Carbon;
+use App\Services\BrandService;
+use Exception;
 
 class BrandController extends Controller
 {
+    protected $brandService;
+
+    public function __construct(BrandService $brandService)
+    {
+        $this->brandService = $brandService;
+    }
+
     public function get_all_brand()
     {
-        $brands = Brand::all();
-        return response()->json([
-            'status' => "SUCCESS",
-            'brands' => $brands,
-        ]);
+        $brands = $this->brandService->getAllBrand();
+        return $this->successResponse($brands);
     }
 
     public function update_brand(Request $req)
     {
-        Brand::updateOrCreate([
-            'id'   =>   $req->id,
-        ], ['description' => $req->description, 'name' =>  $req->name]);
-        return response()->json([
-            'status' => "SUCCESS",
-        ]);
+        try {
+            $this->brandService->updateOrSave($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     public function delete_brand(Request $req)
     {
-        Brand::destroy($req->id);
-        return response()->json([
-            "status" => "SUCCESS",
-        ]);
+        try {
+            $this->brandService->delete($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     public function import_excel(Request $req)
     {
-        $file = $req->file('file');
-        if (Excel::import(new ImportExcelBrand, $file)) {
-            return response()->json(["status" => "SUCCESS"]);
+        try {
+            $this->brandService->importExcel($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
         }
-
-        return response()->json(["status" => "FAIL"]);
     }
 
     public function export_excel()
     {
-        $time = Carbon::now('Asia/Ho_Chi_Minh')->format('Hisddmmyy');
-        return Excel::download(new ExportExcelBrand, 'brand_' . $time . '.xlsx');
+        return $this->brandService->exportExcel();
     }
 }

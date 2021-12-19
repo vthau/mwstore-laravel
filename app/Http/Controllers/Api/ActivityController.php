@@ -3,27 +3,28 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Activity;
+use App\Services\ActivityService;
 use Illuminate\Http\Request;
 
 
 class ActivityController extends Controller
 {
+    protected $activityService;
+
+    public function __construct(ActivityService $activityService)
+    {
+        $this->activityService = $activityService;
+    }
+
     public function all_activity()
     {
-        $activities =  Activity::latest()->paginate(4);
-        return response()->json([
-            'status' => "SUCCESS",
-            'data' => $activities,
-        ]);
+        $activities = $this->activityService->getAll();
+        return $this->successResponse($activities);
     }
 
     public function get_activity(Request $req)
     {
-        $activities =  Activity::where("user_id", $req->user_id)->latest()->paginate(4);
-        return response()->json([
-            'status' => "SUCCESS",
-            'data' => $activities,
-        ]);
+        $activities = $this->activityService->getByUser($req);
+        return $this->successResponse($activities);
     }
 }

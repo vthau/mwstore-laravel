@@ -3,58 +3,58 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Slider;
 use Illuminate\Http\Request;
-use PhpParser\Node\Expr\FuncCall;
+use App\Services\SliderService;
+use Exception;
 
 class SliderController extends Controller
 {
+    protected $sliderService;
+
+    public function __construct(SliderService $sliderService)
+    {
+        $this->sliderService = $sliderService;
+    }
+
     public function get_slider()
     {
-        $sliders = Slider::with(['product'])->latest('id')->take(10)->get();
-        return $sliders;
+        $sliders = $this->sliderService->getLimit();
+        return $this->successResponse($sliders);
     }
 
     public function all_slider()
     {
-        $sliders = Slider::with("product")->get();
-        return response()->json([
-            "status" => "SUCCESS",
-            "sliders" => $sliders,
-        ]);
-    }
-
-    public function delete_slider(Request $req)
-    {
-        Slider::find($req->id)->delete();
-        return response()->json([
-            "status" => "SUCCESS",
-        ]);
+        $sliders = $this->sliderService->getAll();
+        return $this->successResponse($sliders);
     }
 
     public function new_slider(Request $req)
     {
-        $slider = new Slider;
-        $slider->fill($req->all());
-        $slider->save();
-        return response()->json([
-            "status" => "SUCCESS",
-        ]);
+        try {
+            $this->sliderService->save($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     public function update_slider(Request $req)
     {
-        $slider = Slider::find($req->id);
-
-        if ($req->hasFile('image')) {
-            $image = $slider->image;
-            $slider->image = "";
-            deleteImage($image, 'sliders');
+        try {
+            $this->sliderService->update($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
         }
-        $slider->fill($req->only(["name", "show_hide"]));
-        $slider->save();
-        return response()->json([
-            "status" => "SUCCESS",
-        ]);
+    }
+
+    public function delete_slider(Request $req)
+    {
+        try {
+            $this->sliderService->delete($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 }

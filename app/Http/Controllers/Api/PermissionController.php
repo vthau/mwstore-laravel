@@ -3,14 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Permission;
-use Illuminate\Http\Request;
+use App\Services\PermissionService;
 
 class PermissionController extends Controller
 {
+    protected $permissionService;
+
+    public function __construct(PermissionService $permissionService)
+    {
+        $this->permissionService = $permissionService;
+    }
+
     public function all_permission()
     {
-        $permissions = Permission::where([["key_code", "<>", "ADMIN"], ["key_code", "<>", "ROLE"]])->get();
-        return response()->json(["status" => "SUCCESS", "data" => $permissions]);
+        $permissions = $this->permissionService->getAll();
+        return $this->successResponse($permissions);
     }
 }

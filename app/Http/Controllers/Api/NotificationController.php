@@ -3,47 +3,48 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Notification;
 use Illuminate\Http\Request;
+use App\Services\NotificationService;
+use Exception;
 
 class NotificationController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     public function get_token(Request $req)
     {
-        $tokens = Notification::where("user_id", $req->user_id)->get();
-        return response()->json(["status" => "SUCCESS", "data" => $tokens]);
+        $tokens = $this->notificationService->getTokenByUser($req);
+        return $this->successResponse($tokens);
     }
 
     public function all_token()
     {
-        $tokens = Notification::all();
-        return response()->json(["status" => "SUCCESS", "data" => $tokens]);
+        $tokens = $this->notificationService->getAll();
+        return $this->successResponse($tokens);
     }
 
     public function noti_guest(Request $req)
     {
-        $noti = Notification::where("token", $req->token)->first();
-        if (!$noti) {
-            $noti = new Notification;
-            $noti->token = $req->token;
-            $noti->save();
+        try {
+            $this->notificationService->saveGuest($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
         }
-
-        return response()->json(["status" => "SUCCESS"]);
     }
 
     public function noti_user(Request $req)
     {
-        $noti = Notification::where("token", $req->token)->first();
-
-        if (!$noti) {
-            $noti = new Notification;
-            $noti->token = $req->token;
+        try {
+            $this->notificationService->saveUser($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
         }
-
-        $noti->user_id = auth()->user()->id;
-        $noti->save();
-
-        return response()->json(["status" => "SUCCESS"]);
     }
 }

@@ -4,79 +4,57 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Activity;
-use App\Models\Cart;
+use App\Services\CartService;
+use Exception;
 
 class CartController extends Controller
 {
+    protected $cartService;
+
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService;
+    }
 
     public function store(Request $req)
     {
-        Cart::updateOrStore($req);
-        Activity::addCart();
-        return response()->json([
-            "status" => "SUCCESS",
-        ]);
+        try {
+            $this->cartService->updateOrSave($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     public function get_cart()
     {
-        $carts = auth()->user()->carts()->with('product')->get();
-        $totalPrice = Cart::totalPriceChecked();
-        if ($carts) {
-            return response()->json([
-                "status" => "SUCCESS",
-                "carts" => $carts,
-                "total_price" => $totalPrice,
-            ]);
-        }
-
-        return $carts;
+        $result = $this->cartService->getByUser();
+        return $this->successResponse($result);
     }
 
     public function get_cart_checked()
     {
-        $carts = auth()->user()->carts()->with('product')->where("checked", 1)->get();
-        $totalPrice = Cart::totalPriceChecked();
-        if ($carts) {
-            return response()->json([
-                "status" => "SUCCESS",
-                "carts" => $carts,
-                "total_price" => $totalPrice,
-            ]);
-        }
-
-        return $carts;
+        $result = $this->cartService->getByChecked();
+        return $this->successResponse($result);
     }
 
     public function checked(Request $req)
     {
-        $user_id = auth()->user()->id;
-        $cart = Cart::where(['user_id' => $user_id, 'id' => $req->id])->first();
-        if ($cart) {
-            if ($req->type === "CHECK") {
-                $cart->checked = 1;
-            } else {
-                $cart->checked = 0;
-            }
-
-            $cart->save();
-            Activity::updateCart();
-            return response()->json([
-                "status" => "SUCCESS",
-            ]);
+        try {
+            $this->cartService->checked($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
         }
-
-        return $cart;
     }
 
     public function delete(Request $req)
     {
-        $user_id = auth()->user()->id;
-        Cart::where(['user_id' => $user_id, 'id' => $req->id])->delete();
-        Activity::deleteCart();
-        return response()->json([
-            "status"    =>   "SUCCESS"
-        ]);
+        try {
+            $this->cartService->delete($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 }

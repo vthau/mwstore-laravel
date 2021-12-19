@@ -6,7 +6,7 @@ use App\Http\Requests\PostRequest;
 use App\Models\PostProduct;
 use App\Models\Product;
 
-class PostProductController extends Controller
+class PostController extends Controller
 {
     public function index()
     {

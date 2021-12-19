@@ -3,21 +3,32 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Message;
 use Illuminate\Http\Request;
+use App\Services\MessageService;
+use Exception;
 
 class MessageController extends Controller
 {
+    protected $messageService;
+
+    public function __construct(MessageService $messageService)
+    {
+        $this->messageService = $messageService;
+    }
+
     public function get_message(Request $req)
     {
-        $messages = Message::with(["user", "admin"])
-            ->where(["user_id" => $req->user_id, "admin_id" => $req->admin_id])->get();
-        return response()->json(["status" => "SUCCESS", "data" => $messages]);
+        $messages = $this->messageService->getById($req);
+        return $this->successResponse($messages);
     }
 
     public function new_message(Request $req)
     {
-        Message::create($req->all());
-        return response()->json(["status" => "SUCCESS"]);
+        try {
+            $this->messageService->save($req);
+            return $this->successResponse();
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 }
